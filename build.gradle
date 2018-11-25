@@ -22,8 +22,8 @@ version '1.0-SNAPSHOT'
 
 sourceCompatibility = 1.8
 
-mainClassName = 'com.aruistar.vertxdemo.launcher.AruisLauncher'
-def mainVerticleName = 'com.aruistar.vertxdemo.MainVerticle'
+mainClassName = 'io.vertx.core.Launcher'
+def mainVerticleName = 'com.aruistar.vertxdemo.web.HttpVerticle'
 
 
 repositories {

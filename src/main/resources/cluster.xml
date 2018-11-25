@@ -29,7 +29,7 @@
         <name>dev</name>
         <password>dev-pass</password>
     </group>
-    <management-center enabled="true">http://localhost:8080/mancenter</management-center>
+    <management-center enabled="false">http://127.0.0.1:8080/hazelcast-mancenter/</management-center>
     <network>
         <port auto-increment="true" port-count="10000">5701</port>
         <outbound-ports>
