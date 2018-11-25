@@ -10,6 +10,7 @@ import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
+import io.vertx.ext.web.sstore.ClusteredSessionStore
 import io.vertx.ext.web.sstore.LocalSessionStore
 
 @Slf4j
@@ -21,7 +22,7 @@ class HttpVerticle extends AbstractVerticle {
         def port = config().getInteger("port", 7788)
 
 
-        def store = LocalSessionStore.create(vertx)
+        def store = ClusteredSessionStore.create(vertx)
         router.route().handler(CookieHandler.create())
         router.route().handler(SessionHandler.create(store))
         router.route("/set").handler({ routingContext ->

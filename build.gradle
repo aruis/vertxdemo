@@ -54,7 +54,7 @@ dependencies {
         exclude group: "org.codehaus.groovy", module: "groovy-all"
     }
 //    compile "io.vertx:vertx-ignite:$vertx_version"
-//    compile "io.vertx:vertx-hazelcast:$vertx_version"
+    compile "io.vertx:vertx-hazelcast:$vertx_version"
 //    compile "io.vertx:vertx-zookeeper:$vertx_version"
 
     compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
