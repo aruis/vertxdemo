@@ -1,0 +1,67 @@
+buildscript {
+    ext {
+        vertx_version = '3.5.4'
+        groovy_version = '2.5.3'
+    }
+
+    repositories {
+        jcenter()
+    }
+
+}
+
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'application'
+    id "com.github.johnrengelman.shadow" version "2.0.4"
+}
+
+group 'com.aruistar.vertxdemo'
+version '1.0-SNAPSHOT'
+
+sourceCompatibility = 1.8
+
+mainClassName = 'com.aruistar.vertxdemo.launcher.AruisLauncher'
+def mainVerticleName = 'com.aruistar.vertxdemo.MainVerticle'
+
+
+repositories {
+    mavenLocal()
+    jcenter()
+}
+
+shadowJar {
+    classifier = 'fat'
+    manifest {
+        attributes 'Main-Verticle': mainVerticleName
+    }
+    mergeServiceFiles {
+        include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+    }
+
+}
+
+dependencies {
+    compile "org.codehaus.groovy:groovy:$groovy_version"
+    compile "org.codehaus.groovy:groovy-json:$groovy_version"
+    compile "org.codehaus.groovy:groovy-dateutil:$groovy_version"
+    compile "org.codehaus.groovy:groovy-sql:$groovy_version"
+
+    compile "io.vertx:vertx-core:$vertx_version"
+    compile "io.vertx:vertx-web:$vertx_version"
+    compile("io.vertx:vertx-lang-groovy:$vertx_version") {
+        exclude group: "org.codehaus.groovy", module: "groovy-all"
+    }
+//    compile "io.vertx:vertx-ignite:$vertx_version"
+//    compile "io.vertx:vertx-hazelcast:$vertx_version"
+//    compile "io.vertx:vertx-zookeeper:$vertx_version"
+
+    compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
+
+    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
+    compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
+
+    testCompile "org.codehaus.groovy:groovy-test:$groovy_version"
+}
+

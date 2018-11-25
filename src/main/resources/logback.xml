@@ -1,0 +1,79 @@
+<!--
+  ~ Copyright (c) 2017 Red Hat, Inc. and/or its affiliates.
+  ~ Copyright (c) 2017 INSA Lyon, CITI Laboratory.
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<configuration>
+
+    <!-- 定义日志的根目录 -->
+    <property name="LOG_HOME" value="./log"/>
+    <!-- 定义日志文件名称 -->
+    <property name="appName" value="vertxdemo"/>
+
+    <!-- 滚动文件输出。当符合某个条件时，将日志记录滚动到其他文件 -->
+    <appender name="appLogAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <Encoding>UTF-8</Encoding>
+        <!-- 指定日志文件的名称 -->
+        <file>${LOG_HOME}/${appName}.log</file>
+        <!--
+          制定滚动策略，涉及文件移动和重命名。
+          TimeBasedRollingPolicy： 最常用的滚动策略，它根据时间来制定滚动策略，
+          既负责滚动也负责触发滚动。
+        -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+              滚动时产生的文件的存放位置及文件名称
+              %d{yyyy-MM-dd}表示按天进行滚动
+              %i表示当文件大小超过maxFileSize时，按照i进行文件滚动
+            -->
+            <fileNamePattern>${LOG_HOME}/${appName}-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <!--
+              可选节点，控制保留的归档文件的最大数量，超出数量就删除旧文件。
+              假设设置每天滚动，且maxHistory是365，则只保存最近365天的文件，
+              删除之前的旧文件。注意，删除旧文件时，那些为了归档而创建的目录也会被删除。
+            -->
+            <MaxHistory>365</MaxHistory>
+            <!--
+              当日志文件超过maxFileSize指定的大小时，根据上面提到的%i进行日志文件滚动。
+              注意此处配置SizeBasedTriggeringPolicy是无法实现按文件大小进行滚动的，
+              必须配置timeBasedFileNamingAndTriggeringPolicy
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+        </rollingPolicy>
+        <!-- 日志输出格式 -->
+        <layout class="ch.qos.logback.classic.PatternLayout">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [ %thread ] - [ %-5level ] [ %logger{50} : %line ] - %msg%n</pattern>
+        </layout>
+    </appender>
+
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="io.netty" level="warn"/>
+    <logger name="io.vertx" level="warn"/>
+    <logger name="com.longruan" level="info"/>
+
+    <root level="warn">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="appLogAppender"/>
+    </root>
+
+</configuration>

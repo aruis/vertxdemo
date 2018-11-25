@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Hello Vert.x!</title>
+</head>
+<body>
+<h1>Hello Vert.x!</h1>
+<script src="bus/sockjs.js"></script>
+<script src="bus/vertx-eventbus.js"></script>
+<script>
+    var eb = new EventBus('/messagebus/');
+    eb.enableReconnect(true)
+    eb.onopen = function () {
+        eb.registerHandler('feed', function (err, msg) {
+            console.log(msg)
+        })
+    };
+</script>
+</body>
+</html>
