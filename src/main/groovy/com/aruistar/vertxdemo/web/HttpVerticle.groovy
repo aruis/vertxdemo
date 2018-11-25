@@ -67,7 +67,7 @@ class HttpVerticle extends AbstractVerticle {
 
         vertx.setPeriodic(1000l, { t ->
             // Create a timestamp string
-            eb.send("feed", Thread.currentThread().name)
+            eb.send("feed", vertx.deploymentIDs().toString())
         });
     }
 }
