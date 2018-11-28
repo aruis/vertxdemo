@@ -2,7 +2,7 @@ package com.aruistar.vertxdemo.web
 
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
-import io.vertx.core.eventbus.EventBus
+import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CookieHandler
@@ -16,15 +16,59 @@ import io.vertx.ext.web.sstore.LocalSessionStore
 @Slf4j
 class HttpVerticle extends AbstractVerticle {
 
+
+    static void main(String[] args) {
+        Vertx.vertx().deployVerticle(new HttpVerticle())
+    }
+
     @Override
     void start() throws Exception {
+
+        vertx.deployVerticle(new DatabaseVerticle())
+
+
         Router router = Router.router(vertx);
-        def port = config().getInteger("port", 7788)
+        def port = config().getInteger("port", 8899)
 
+        def store
+        if (vertx.isClustered())
+            store = ClusteredSessionStore.create(vertx)
+        else
+            store = LocalSessionStore.create(vertx)
 
-        def store = ClusteredSessionStore.create(vertx)
         router.route().handler(CookieHandler.create())
         router.route().handler(SessionHandler.create(store))
+
+        def eb = vertx.eventBus()
+
+        router.route("/clean").handler { routingContext ->
+            def response = routingContext.response()
+
+            eb.send('clean', '', {
+                if (it.succeeded()) {
+                    response.end("ok")
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+        }
+
+        router.route("/miaosha").handler({ routingContext ->
+
+            def response = routingContext.response()
+
+            eb.send('miaosha', '', {
+                if (it.succeeded()) {
+                    response.end(it.result().body().toString())
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+
+        })
+
         router.route("/set").handler({ routingContext ->
 
             def session = routingContext.session()
@@ -63,7 +107,6 @@ class HttpVerticle extends AbstractVerticle {
 
         })
 
-        EventBus eb = vertx.eventBus()
 
         vertx.setPeriodic(1000l, { t ->
             // Create a timestamp string

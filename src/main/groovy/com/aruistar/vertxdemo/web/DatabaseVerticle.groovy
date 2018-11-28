@@ -1,0 +1,107 @@
+package com.aruistar.vertxdemo.web
+
+import io.reactiverse.pgclient.PgClient
+import io.reactiverse.pgclient.PgPool
+import io.reactiverse.pgclient.PgPoolOptions
+import io.reactiverse.pgclient.Tuple
+import io.vertx.core.AbstractVerticle
+
+class DatabaseVerticle extends AbstractVerticle {
+
+    PgPoolOptions pgOptions
+    PgPool pgPool
+
+    @Override
+    void start() throws Exception {
+
+        pgOptions = new PgPoolOptions()
+                .setPort(54328)
+                .setHost("127.0.0.1")
+//                .setHost("192.168.0.88")
+                .setDatabase("miaosha")
+                .setUser("postgres")
+                .setPassword("longruan2018")
+                .setCachePreparedStatements(true)
+                .setMaxSize(8)
+
+        pgPool = PgClient.pool(vertx, pgOptions)
+
+
+        def eb = vertx.eventBus()
+
+        eb.consumer("clean", { msg ->
+            pgPool.query('delete  from orders;update commodity set b_sell = false;', {
+                if (it.succeeded()) {
+                    msg.reply("ok")
+                } else {
+                    msg.fail(500, 'delete err')
+                }
+            })
+        })
+
+        eb.consumer("miaosha", { msg ->
+            pgPool.getConnection({ res ->
+                if (res.succeeded()) {
+
+                    // Transaction must use a connection
+                    def conn = res.result()
+
+                    // Begin the transaction
+                    def tx = conn.begin().abortHandler({ v ->
+                        println("tx error")
+                        conn.close()
+                        msg.reply("tx error")
+                    })
+
+                    conn.preparedQuery("select id from commodity where b_sell = false for update skip locked limit 1;", { ar ->
+                        // Works fine of course
+                        if (ar.succeeded()) {
+                            def row = ar.result()
+                            if (row.size() > 0) {
+                                def id = row[0].getString("id")
+                                conn.preparedQuery('update commodity set b_sell = true where id = $1', Tuple.of(id), {
+                                    if (it.succeeded()) {
+                                        conn.preparedQuery('insert into orders (id_at_commodity) values ($1) RETURNING id', Tuple.of(id), {
+                                            if (it.succeeded()) {
+                                                def insertRow = it.result()
+                                                def insertid = insertRow[0].getString("id")
+
+                                                tx.commit {
+                                                    if (it.succeeded()) {
+                                                        conn.close()
+                                                        println(insertid)
+                                                        msg.reply(insertid)
+                                                    }
+                                                }
+
+                                            } else {
+                                                tx.rollback()
+                                                conn.close()
+                                            }
+                                        })
+                                    } else {
+                                        tx.rollback()
+                                        conn.close()
+                                    }
+                                })
+
+
+                            } else {
+                                tx.rollback()
+                                conn.close()
+                                println("sold out")
+                                msg.reply("sold out")
+                            }
+                        } else {
+                            tx.rollback()
+                            conn.close()
+                        }
+                    })
+
+                }
+            })
+
+        })
+
+    }
+}
