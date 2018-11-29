@@ -39,6 +39,34 @@ class DatabaseVerticle extends AbstractVerticle {
             })
         })
 
+        eb.consumer('miaosha_pl', { msg ->
+
+            pgPool.getConnection({ res ->
+                if (res.succeeded()) {
+                    def conn = res.result()
+                    conn.query("select miao()", {
+                        if (it.succeeded()) {
+                            def row = it.result()
+                            def id = row[0].getString("miao")
+                            if (id?.length() > 0) {
+                                msg.reply(id)
+                            } else {
+                                msg.reply("sold out")
+                            }
+
+                        } else {
+                            msg.fail(500, 'miao err')
+                        }
+                        conn.close()
+                    })
+                } else {
+                    msg.fail(500, 'miao err')
+                }
+
+            })
+
+        })
+
         eb.consumer("miaosha", { msg ->
             pgPool.getConnection({ res ->
                 if (res.succeeded()) {

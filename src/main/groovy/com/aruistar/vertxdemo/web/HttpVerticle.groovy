@@ -85,6 +85,21 @@ class HttpVerticle extends AbstractVerticle {
 
         })
 
+        router.route("/miaosha_pl").handler({ routingContext ->
+
+            def response = routingContext.response()
+
+            eb.send('miaosha_pl', '', {
+                if (it.succeeded()) {
+                    response.end(it.result().body().toString())
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+
+        })
+
         router.route("/set").handler({ routingContext ->
 
             def session = routingContext.session()
