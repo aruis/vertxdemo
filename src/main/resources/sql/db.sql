@@ -24,3 +24,12 @@ create table orders
 
 alter table orders owner to postgres;
 
+
+insert into commodity (n_price)
+select (random() * 100)::int
+from generate_series(1, 10000);
+
+
+update commodity set v_name = 'name_'||n_price;
+update commodity set v_info = md5(v_name::text);
+

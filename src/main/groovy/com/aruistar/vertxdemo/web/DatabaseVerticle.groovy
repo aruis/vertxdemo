@@ -15,14 +15,14 @@ class DatabaseVerticle extends AbstractVerticle {
     void start() throws Exception {
 
         pgOptions = new PgPoolOptions()
-                .setPort(54328)
-                .setHost("127.0.0.1")
+                .setPort(config().getInteger("port"))
+                .setHost(config().getString("host"))
 //                .setHost("192.168.0.88")
-                .setDatabase("miaosha")
-                .setUser("postgres")
-                .setPassword("longruan2018")
+                .setDatabase(config().getString("database"))
+                .setUser(config().getString("user"))
+                .setPassword(config().getString("password"))
                 .setCachePreparedStatements(true)
-                .setMaxSize(8)
+                .setMaxSize(config().getInteger("maxsize"))
 
         pgPool = PgClient.pool(vertx, pgOptions)
 

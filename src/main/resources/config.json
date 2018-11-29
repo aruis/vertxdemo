@@ -1,3 +1,13 @@
 {
-  "port": 7788
+  "http": {
+    "port": 8899
+  },
+  "db": {
+    "host": "192.168.0.88",
+    "port": 54328,
+    "database": "miaosha",
+    "user": "postgres",
+    "password": "test",
+    "maxsize": 6
+  }
 }

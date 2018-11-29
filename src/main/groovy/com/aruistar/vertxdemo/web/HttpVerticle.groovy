@@ -2,6 +2,7 @@ package com.aruistar.vertxdemo.web
 
 import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
+import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
@@ -18,17 +19,32 @@ class HttpVerticle extends AbstractVerticle {
 
 
     static void main(String[] args) {
-        Vertx.vertx().deployVerticle(new HttpVerticle())
+        Vertx.vertx().deployVerticle(new HttpVerticle(), new DeploymentOptions([config: [
+                "http": [
+                        "port": 8899
+                ],
+                "db"  : [
+                        "host"    : "192.168.0.88",
+                        "port"    : 54328,
+                        "database": "miaosha",
+                        "user"    : "postgres",
+                        "password": "longruan2018",
+                        "maxsize" : 6
+                ]
+        ]]))
     }
 
     @Override
     void start() throws Exception {
 
-        vertx.deployVerticle(new DatabaseVerticle())
+        def httpConfig = config().getJsonObject("http")
+        def dbConfig = config().getJsonObject("db")
+
+        vertx.deployVerticle(new DatabaseVerticle(), new DeploymentOptions([config: dbConfig]))
 
 
         Router router = Router.router(vertx);
-        def port = config().getInteger("port", 8899)
+        def port = httpConfig.getInteger("port", 8899)
 
         def store
         if (vertx.isClustered())
