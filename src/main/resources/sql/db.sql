@@ -24,6 +24,8 @@ create table orders
 
 alter table orders owner to postgres;
 
+create index commodity_b_sell_index on commodity (b_sell) ;
+
 
 insert into commodity (n_price)
 select (random() * 100)::int

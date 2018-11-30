@@ -92,16 +92,16 @@ ALTER TABLE public.orders OWNER TO postgres;
 --
 
 COPY public.commodity (id, v_name, n_price, v_info, b_sell) FROM stdin;
-01fc0988-6aba-4449-857a-b6196a0a2f10	name_95	95	7ce2e3b2fb3cde545a6cbd310da39a54	f
-65b19eea-758f-4b6f-8422-06c2562d90ba	name_4	4	9643c46f95c1412a6bf7fde38edc9f7c	f
-d2addccf-6751-409d-b574-e639f040219f	name_26	26	7d18861f7fa1e99d1c89570464fdc3ab	f
-98fc3f7f-471e-4f1d-b9c1-f095ea5eff29	name_45	45	aa633852a2ddf24f90a9a6d07f6a21fe	f
-5427e75a-18f5-4153-ba90-2c886e589e0a	name_54	54	57caa3d1104ce988371eced39cba2d36	f
-cb9960c6-a96e-42c8-82b6-70f1ec28fd77	name_14	14	a9766fb712e84568dfa95b9b20118e9d	f
-115b2911-7409-471e-a343-6ad30f506cf6	name_84	84	e99df240129ce487432cfc9280e314a2	f
-c69a21b1-cf5e-44a0-92c5-4a266cf5904d	name_51	51	71e4e974f6717813518911984bc3c563	f
-ed2c358c-fab0-44bf-8b35-dd694b5f0792	name_84	84	e99df240129ce487432cfc9280e314a2	f
-de801c87-3a81-405e-acc7-067f768a4a63	name_49	49	4d3e83d5da9471253880ce6a5ec716f9	f
+1b30bae1-fa6a-4933-9d16-4d2e4368e75c	name_8	8	14d2e3d3c29f994f067fd4b74bca2a8d	f
+2b83fa02-47e3-46b1-8c90-0831528b56eb	name_22	22	cfd33e6d294994ea9e8a3fda24a14af0	f
+0c65ce8c-615d-4c04-84f4-afa272f3c1f3	name_75	75	fbf272016b0def4ef78e12a3189f3655	f
+2fbbd4fe-fe4f-47c9-b25e-f71eb1f56134	name_91	91	f5c0e45904254c6375994f649f4a4151	f
+c590dc4c-0385-4406-ab11-84ecbc735bce	name_66	66	bb84dab195dc22f30bfb92e146ff5717	f
+7851483d-f564-4894-9797-069fc0f244e3	name_3	3	9d7d704c032ccf532eafd31696d27f85	f
+166dc439-1e54-4927-b8c4-5476e44e82e7	name_11	11	5d17a6bbaf09b9e545ba56c8367b381c	f
+6d7f86d5-2378-42eb-bcd1-b2da6c70501b	name_75	75	fbf272016b0def4ef78e12a3189f3655	f
+063cc1ac-4dd6-404e-abc3-3f37bb934be5	name_18	18	9a199ac4970be7cc70d8ba8e13d763c9	f
+5644bfb1-8eb4-42e3-9124-7d6ba8d9f181	name_6	6	ac345550f15da4f889530d1fcb478507	f
 \.
 
 
@@ -127,6 +127,13 @@ ALTER TABLE ONLY public.commodity
 
 ALTER TABLE ONLY public.orders
     ADD CONSTRAINT orders_pk PRIMARY KEY (id);
+
+
+--
+-- Name: commodity_b_sell_index2; Type: INDEX; Schema: public; Owner: postgres
+--
+
+CREATE INDEX commodity_b_sell_index2 ON public.commodity USING btree (b_sell);
 
 
 --
