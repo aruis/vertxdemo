@@ -1,10 +1,19 @@
 package com.aruistar.vertxdemo.web
 
+import com.codahale.metrics.MetricRegistry
+import com.codahale.metrics.SharedMetricRegistries
 import groovy.util.logging.Slf4j
+import in.yunyul.vertx.console.base.WebConsoleRegistry
+import in.yunyul.vertx.console.eventbus.EventBusConsolePage
+import in.yunyul.vertx.console.httpclients.HttpClientsConsolePage
+import in.yunyul.vertx.console.logging.LoggingConsolePage
+import in.yunyul.vertx.console.metrics.MetricsConsolePage
+import in.yunyul.vertx.console.pools.PoolsConsolePage
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
+import io.vertx.ext.dropwizard.MetricsService
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.CookieHandler
 import io.vertx.ext.web.handler.SessionHandler
@@ -60,6 +69,25 @@ class HttpVerticle extends AbstractVerticle {
         router.route().handler(SessionHandler.create(store))
 
         def eb = vertx.eventBus()
+
+        MetricRegistry dropwizardRegistry = SharedMetricRegistries.getOrCreate(
+                System.getProperty("vertx.metrics.options.registryName") // or use hardcoded name
+        )
+        MetricsService metricsService = MetricsService.create(vertx);
+
+        // Set up web console registry
+        WebConsoleRegistry.create("/admin")
+                .addPage(MetricsConsolePage.create(dropwizardRegistry))
+//                .addPage(ServicesConsolePage.create(discovery))
+                .addPage(LoggingConsolePage.create())
+//                .addPage(CircuitBreakersConsolePage.create())
+//                .addPage(ShellConsolePage.create())
+//                .addPage(HealthConsolePage.create(healthChecks))
+                .addPage(PoolsConsolePage.create(metricsService))
+                .addPage(EventBusConsolePage.create(metricsService))
+                .addPage(HttpClientsConsolePage.create(metricsService))
+                .setCacheBusterEnabled(true) // Adds random query string to scripts
+                .mount(vertx, router);
 
         router.route("/clean").handler { routingContext ->
             def response = routingContext.response()

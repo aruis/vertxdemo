@@ -2,6 +2,7 @@ buildscript {
     ext {
         vertx_version = '3.5.4'
         groovy_version = '2.5.3'
+        vertx_console_version = 'ca8b2b517f'
     }
 
     repositories {
@@ -29,6 +30,7 @@ def mainVerticleName = 'com.aruistar.vertxdemo.web.HttpVerticle'
 repositories {
     mavenLocal()
     jcenter()
+    maven { url 'https://jitpack.io' }
 }
 
 shadowJar {
@@ -59,6 +61,21 @@ dependencies {
 //    compile "io.vertx:vertx-ignite:$vertx_version"
     compile "io.vertx:vertx-hazelcast:$vertx_version"
 //    compile "io.vertx:vertx-zookeeper:$vertx_version"
+
+    compile "io.vertx:vertx-dropwizard-metrics:$vertx_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-base:${vertx_console_version}"
+    compile "com.github.yunyu.vertx-console:vertx-console-services:${vertx_console_version}"
+    compile "com.github.yunyu.vertx-console:vertx-console-metrics:${vertx_console_version}"
+    compile 'io.prometheus:simpleclient_hotspot:0.5.0'
+    compile 'io.prometheus:simpleclient_dropwizard:0.5.0'
+    compile 'com.github.yunyu:prometheus-jvm-extras:1.2-SNAPSHOT'
+
+    compile "com.github.yunyu.vertx-console:vertx-console-services:$vertx_console_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-logging:$vertx_console_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-health:$vertx_console_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-pools:$vertx_console_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-eventbus:$vertx_console_version"
+    compile "com.github.yunyu.vertx-console:vertx-console-http-clients:$vertx_console_version"
 
     compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
     compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
