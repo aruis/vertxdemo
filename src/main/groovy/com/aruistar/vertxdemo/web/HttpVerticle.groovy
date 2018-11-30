@@ -37,6 +37,10 @@ class HttpVerticle extends AbstractVerticle {
     @Override
     void start() throws Exception {
 
+        boolean usingNative = vertx.isNativeTransportEnabled()
+
+        log.info("Running with native: " + usingNative)
+
         def httpConfig = config().getJsonObject("http")
         def dbConfig = config().getJsonObject("db")
 
@@ -90,6 +94,21 @@ class HttpVerticle extends AbstractVerticle {
             def response = routingContext.response()
 
             eb.send('miaosha_pl', '', {
+                if (it.succeeded()) {
+                    response.end(it.result().body().toString())
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+
+        })
+
+        router.route("/miaosha_pl_g").handler({ routingContext ->
+
+            def response = routingContext.response()
+
+            eb.send('miaosha_pl_g', '', {
                 if (it.succeeded()) {
                     response.end(it.result().body().toString())
                 } else {

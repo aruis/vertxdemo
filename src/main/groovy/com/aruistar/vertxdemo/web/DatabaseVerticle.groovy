@@ -1,5 +1,7 @@
 package com.aruistar.vertxdemo.web
 
+import com.alibaba.druid.pool.DruidDataSource
+import groovy.sql.Sql
 import io.reactiverse.pgclient.PgClient
 import io.reactiverse.pgclient.PgPool
 import io.reactiverse.pgclient.PgPoolOptions
@@ -10,21 +12,38 @@ class DatabaseVerticle extends AbstractVerticle {
 
     PgPoolOptions pgOptions
     PgPool pgPool
+    Sql db
 
     @Override
     void start() throws Exception {
 
+        def port = config().getInteger("port")
+        def host = config().getString("host")
+        def database = config().getString("database")
+        def user = config().getString("user")
+        def password = config().getString("password")
+        def maxSize = config().getInteger("maxsize")
+
         pgOptions = new PgPoolOptions()
-                .setPort(config().getInteger("port"))
-                .setHost(config().getString("host"))
-//                .setHost("192.168.0.88")
-                .setDatabase(config().getString("database"))
-                .setUser(config().getString("user"))
-                .setPassword(config().getString("password"))
+                .setPort(port)
+                .setHost(host)
+                .setDatabase(database)
+                .setUser(user)
+                .setPassword(password)
+                .setMaxSize(maxSize)
                 .setCachePreparedStatements(true)
-                .setMaxSize(config().getInteger("maxsize"))
 
         pgPool = PgClient.pool(vertx, pgOptions)
+
+        def dbSource = new DruidDataSource()
+        dbSource.setUrl("jdbc:postgresql://${host}:${port}/${database}")
+        dbSource.setDriverClassName("org.postgresql.Driver")
+        dbSource.setUsername(user)
+        dbSource.setPassword(password)
+        dbSource.setInitialSize(maxSize)
+        dbSource.setMaxActive(maxSize)
+
+        db = new Sql(dbSource)
 
 
         def eb = vertx.eventBus()
@@ -37,6 +56,21 @@ class DatabaseVerticle extends AbstractVerticle {
                     msg.fail(500, 'delete err')
                 }
             })
+        })
+
+        eb.consumer('miaosha_pl_g', { msg ->
+            vertx.executeBlocking({
+                String id = db.firstRow("select miao()").miao
+                if (id?.length()) {
+
+                } else {
+                    id = "sold out"
+                }
+                it.complete(id)
+            }, false, {
+                msg.reply(it.result().toString())
+            })
+
         })
 
         eb.consumer('miaosha_pl', { msg ->

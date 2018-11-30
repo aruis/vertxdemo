@@ -55,11 +55,13 @@ dependencies {
     compile("io.vertx:vertx-lang-groovy:$vertx_version") {
         exclude group: "org.codehaus.groovy", module: "groovy-all"
     }
+    compile 'io.netty:netty-transport-native-epoll:4.1.15.Final:linux-x86_64'
 //    compile "io.vertx:vertx-ignite:$vertx_version"
     compile "io.vertx:vertx-hazelcast:$vertx_version"
 //    compile "io.vertx:vertx-zookeeper:$vertx_version"
 
     compile group: 'com.alibaba', name: 'druid', version: '1.1.10'
+    compile group: 'org.postgresql', name: 'postgresql', version: '42.2.5'
 
     compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.2.3'
     compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
