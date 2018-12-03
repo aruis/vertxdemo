@@ -16,13 +16,17 @@ import io.vertx.ext.web.sstore.LocalSessionStore
 @Slf4j
 class HttpVerticle extends AbstractVerticle {
 
+    def i = 0
+
     @Override
     void start() throws Exception {
         Router router = Router.router(vertx);
         def port = config().getInteger("port", 7788)
-
-
-        def store = ClusteredSessionStore.create(vertx)
+        def store
+        if (vertx.isClustered())
+            store = ClusteredSessionStore.create(vertx)
+        else
+            store = LocalSessionStore.create(vertx)
         router.route().handler(CookieHandler.create())
         router.route().handler(SessionHandler.create(store))
         router.route("/set").handler({ routingContext ->
@@ -30,6 +34,30 @@ class HttpVerticle extends AbstractVerticle {
             def session = routingContext.session()
             session.put("foo", "bar")
             routingContext.response().end()
+
+        })
+
+        router.route("/add").handler({ routingContext ->
+
+            def response = routingContext.response()
+            i++
+            response.end(i + "")
+
+        })
+
+
+        router.route("/clean").handler({ routingContext ->
+
+            def response = routingContext.response()
+            i = 0
+            response.end(i + "")
+
+        })
+
+        router.route('/show').handler({ routingContext ->
+
+            def response = routingContext.response()
+            response.end(i + "")
 
         })
 
