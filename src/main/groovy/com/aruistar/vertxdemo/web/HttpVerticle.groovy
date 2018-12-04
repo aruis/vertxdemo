@@ -63,7 +63,6 @@ class HttpVerticle extends AbstractVerticle {
 
         router.route("/clean").handler { routingContext ->
             def response = routingContext.response()
-
             eb.send('clean', '', {
                 if (it.succeeded()) {
                     response.end("ok")
@@ -73,6 +72,34 @@ class HttpVerticle extends AbstractVerticle {
             })
 
         }
+
+        router.route("/reset").handler({ routingContext ->
+
+            def response = routingContext.response()
+            def size = routingContext.request().getParam("size")
+
+            eb.send('reset', size, {
+                if (it.succeeded()) {
+                    response.end("ok")
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+        })
+
+        router.route("/miaosha_one_row").handler({ routingContext ->
+
+            def response = routingContext.response()
+
+            eb.send('miaosha_one_row', '', {
+                if (it.succeeded()) {
+                    response.end(it.result().body().toString())
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+        })
 
         router.route("/miaosha").handler({ routingContext ->
 
@@ -94,6 +121,21 @@ class HttpVerticle extends AbstractVerticle {
             def response = routingContext.response()
 
             eb.send('miaosha_pl', '', {
+                if (it.succeeded()) {
+                    response.end(it.result().body().toString())
+                } else {
+                    response.end(it.cause().toString())
+                }
+            })
+
+
+        })
+
+        router.route("/miaosha_one_row_pl").handler({ routingContext ->
+
+            def response = routingContext.response()
+
+            eb.send('miaosha_pl', 'one_row', {
                 if (it.succeeded()) {
                     response.end(it.result().body().toString())
                 } else {
