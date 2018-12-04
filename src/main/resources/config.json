@@ -2,12 +2,20 @@
   "http": {
     "port": 8899
   },
-  "db": {
+  "postgres": {
     "host": "192.168.0.88",
     "port": 54328,
     "database": "miaosha",
     "user": "postgres",
     "password": "test",
+    "maxsize": 6
+  },
+  "mysql": {
+    "host": "192.168.0.88",
+    "port": 33068,
+    "database": "miaosha",
+    "user": "root",
+    "password": "root",
     "maxsize": 6
   }
 }

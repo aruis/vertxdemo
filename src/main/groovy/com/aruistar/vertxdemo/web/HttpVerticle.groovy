@@ -20,17 +20,17 @@ class HttpVerticle extends AbstractVerticle {
 
     static void main(String[] args) {
         Vertx.vertx().deployVerticle(new HttpVerticle(), new DeploymentOptions([config: [
-                "http": [
+                "http" : [
                         "port": 8899
                 ],
-                "db"  : [
-                        "host"    : "192.168.0.88",
-                        "port"    : 54328,
-                        "database": "miaosha",
-                        "user"    : "postgres",
-                        "password": "longruan2018",
-                        "maxsize" : 6
-                ]
+                "mysql": [
+                        "host"       : "127.0.0.1",
+                        "port"       : 33068,
+                        "database"   : "miaosha",
+                        "username"   : "root",
+                        "password"   : "root",
+                        "maxPoolSize": 6
+                ],
         ]]))
     }
 
@@ -42,9 +42,9 @@ class HttpVerticle extends AbstractVerticle {
         log.info("Running with native: " + usingNative)
 
         def httpConfig = config().getJsonObject("http")
-        def dbConfig = config().getJsonObject("db")
+        def mysqlConfig = config().getJsonObject("mysql")
 
-        vertx.deployVerticle(new DatabaseVerticle(), new DeploymentOptions([config: dbConfig]))
+        vertx.deployVerticle(new MysqlVerticle(), new DeploymentOptions([config: mysqlConfig]))
 
 
         Router router = Router.router(vertx);
@@ -60,6 +60,7 @@ class HttpVerticle extends AbstractVerticle {
         router.route().handler(SessionHandler.create(store))
 
         def eb = vertx.eventBus()
+
 
         router.route("/clean").handler { routingContext ->
             def response = routingContext.response()
@@ -106,51 +107,6 @@ class HttpVerticle extends AbstractVerticle {
             def response = routingContext.response()
 
             eb.send('miaosha', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_pl").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_one_row_pl").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl', 'one_row', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_pl_g").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl_g', '', {
                 if (it.succeeded()) {
                     response.end(it.result().body().toString())
                 } else {
