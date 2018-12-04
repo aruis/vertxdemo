@@ -55,6 +55,33 @@ $_$;
 
 ALTER FUNCTION public.miao() OWNER TO postgres;
 
+--
+-- Name: miao_one_row(); Type: FUNCTION; Schema: public; Owner: postgres
+--
+
+CREATE FUNCTION public.miao_one_row() RETURNS character varying
+    LANGUAGE plpgsql
+    AS $_$
+declare
+  id_at_commodity varchar;
+  id_at_order     varchar;
+BEGIN
+
+  execute 'update commodity2 set i_quantity_sell = i_quantity_sell+1 where id = $1 and i_quantity_sell < i_quantity returning id'
+    into id_at_commodity using '566e3ceb-e4d9-4e24-82df-b4ab200258a2';
+
+  if id_at_commodity notnull
+  then
+    execute 'insert into orders (id_at_commodity) values ($1) RETURNING id' into id_at_order using id_at_commodity;
+  end if;
+  
+  return id_at_order;
+END;
+$_$;
+
+
+ALTER FUNCTION public.miao_one_row() OWNER TO postgres;
+
 SET default_tablespace = '';
 
 SET default_with_oids = false;
@@ -75,6 +102,22 @@ CREATE TABLE public.commodity (
 ALTER TABLE public.commodity OWNER TO postgres;
 
 --
+-- Name: commodity2; Type: TABLE; Schema: public; Owner: postgres
+--
+
+CREATE TABLE public.commodity2 (
+    id character varying DEFAULT public.uuid_generate_v4() NOT NULL,
+    v_name character varying,
+    n_price numeric,
+    v_info character varying,
+    i_quantity integer,
+    i_quantity_sell integer DEFAULT 0
+);
+
+
+ALTER TABLE public.commodity2 OWNER TO postgres;
+
+--
 -- Name: orders; Type: TABLE; Schema: public; Owner: postgres
 --
 
@@ -92,16 +135,18 @@ ALTER TABLE public.orders OWNER TO postgres;
 --
 
 COPY public.commodity (id, v_name, n_price, v_info, b_sell) FROM stdin;
-1b30bae1-fa6a-4933-9d16-4d2e4368e75c	name_8	8	14d2e3d3c29f994f067fd4b74bca2a8d	f
-2b83fa02-47e3-46b1-8c90-0831528b56eb	name_22	22	cfd33e6d294994ea9e8a3fda24a14af0	f
-0c65ce8c-615d-4c04-84f4-afa272f3c1f3	name_75	75	fbf272016b0def4ef78e12a3189f3655	f
-2fbbd4fe-fe4f-47c9-b25e-f71eb1f56134	name_91	91	f5c0e45904254c6375994f649f4a4151	f
-c590dc4c-0385-4406-ab11-84ecbc735bce	name_66	66	bb84dab195dc22f30bfb92e146ff5717	f
-7851483d-f564-4894-9797-069fc0f244e3	name_3	3	9d7d704c032ccf532eafd31696d27f85	f
-166dc439-1e54-4927-b8c4-5476e44e82e7	name_11	11	5d17a6bbaf09b9e545ba56c8367b381c	f
-6d7f86d5-2378-42eb-bcd1-b2da6c70501b	name_75	75	fbf272016b0def4ef78e12a3189f3655	f
-063cc1ac-4dd6-404e-abc3-3f37bb934be5	name_18	18	9a199ac4970be7cc70d8ba8e13d763c9	f
-5644bfb1-8eb4-42e3-9124-7d6ba8d9f181	name_6	6	ac345550f15da4f889530d1fcb478507	f
+794c9dbb-5620-4979-b5d1-dfecebf2f195	name_55	55	bf08e33ce1573c0c158ad0520a9c316d	f
+bf55d2ff-6b6c-4761-9661-702a1551aa78	name_42	42	13d3460396734510a7770fce47ba23ae	f
+2a19aefd-8120-46df-b412-fda70738f58f	name_73	73	2385bdd7c4e9e3cd8944c1d899c165bf	f
+\.
+
+
+--
+-- Data for Name: commodity2; Type: TABLE DATA; Schema: public; Owner: postgres
+--
+
+COPY public.commodity2 (id, v_name, n_price, v_info, i_quantity, i_quantity_sell) FROM stdin;
+566e3ceb-e4d9-4e24-82df-b4ab200258a2	iphone xs max	9999	地表最强iphone	3	0
 \.
 
 
@@ -111,6 +156,14 @@ c590dc4c-0385-4406-ab11-84ecbc735bce	name_66	66	bb84dab195dc22f30bfb92e146ff5717
 
 COPY public.orders (id, id_at_commodity, t_create) FROM stdin;
 \.
+
+
+--
+-- Name: commodity2 commodity2_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.commodity2
+    ADD CONSTRAINT commodity2_pk PRIMARY KEY (id);
 
 
 --
