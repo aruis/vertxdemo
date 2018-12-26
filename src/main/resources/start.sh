@@ -1,0 +1,2 @@
+java -jar /Users/liurui/develop/workspace-study/vertxdemo/build/libs/vertxdemo-1.0-SNAPSHOT-fat.jar -ha -cp /Users/liurui/develop/workspace-study/vertxdemo/src/main/resources/cluster -cluster-host=192.168.0.20
+java -jar vertxdemo-1.0-SNAPSHOT-fat.jar -conf config.json  -ha -cp . -cluster-host=192.168.0.88
