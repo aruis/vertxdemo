@@ -10,7 +10,8 @@ import io.vertx.core.DeploymentOptions
 class MainVerticle extends AbstractVerticle {
     @Override
     void start() throws Exception {
-        vertx.deployVerticle(com.aruistar.vertxdemo.web.HttpVerticle.newInstance(), new DeploymentOptions(config()))
+//        vertx.deployVerticle(com.aruistar.vertxdemo.web.HttpVerticle.newInstance(), new DeploymentOptions(config()))
+        vertx.deployVerticle("test.groovy")
         log.info("verticle is starting")
     }
 }
