@@ -30,163 +30,66 @@ COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UU
 
 
 --
--- Name: miao(); Type: FUNCTION; Schema: public; Owner: postgres
+-- Name: check_score(); Type: FUNCTION; Schema: public; Owner: postgres
 --
 
-CREATE FUNCTION public.miao() RETURNS character varying
+CREATE FUNCTION public.check_score() RETURNS trigger
     LANGUAGE plpgsql
-    AS $_$
+    AS $$
 declare
-  id_at_commodity varchar;
-  id_at_order     varchar;
+  result varchar;
 BEGIN
-
-  select id into id_at_commodity from commodity where b_sell = false for update skip locked limit 1;
-  if id_at_commodity notnull
-  then
-    update commodity set b_sell = true where id = id_at_commodity;
-    execute 'insert into orders (id_at_commodity) values ($1) RETURNING id' into id_at_order using id_at_commodity;
+  if new.n_score < 60 then
+    select row_to_json(new)::varchar into result;
+    perform pg_notify('flunk', result);
   end if;
-
-  return id_at_order;
+  return new;
 END;
-$_$;
+$$;
 
 
-ALTER FUNCTION public.miao() OWNER TO postgres;
-
---
--- Name: miao_one_row(); Type: FUNCTION; Schema: public; Owner: postgres
---
-
-CREATE FUNCTION public.miao_one_row() RETURNS character varying
-    LANGUAGE plpgsql
-    AS $_$
-declare
-  id_at_commodity varchar;
-  id_at_order     varchar;
-BEGIN
-
-  execute 'update commodity2 set i_quantity_sell = i_quantity_sell+1 where id = $1 and i_quantity_sell < i_quantity returning id'
-    into id_at_commodity using '566e3ceb-e4d9-4e24-82df-b4ab200258a2';
-
-  if id_at_commodity notnull
-  then
-    execute 'insert into orders (id_at_commodity) values ($1) RETURNING id' into id_at_order using id_at_commodity;
-  end if;
-  
-  return id_at_order;
-END;
-$_$;
-
-
-ALTER FUNCTION public.miao_one_row() OWNER TO postgres;
+ALTER FUNCTION public.check_score() OWNER TO postgres;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- Name: commodity; Type: TABLE; Schema: public; Owner: postgres
+-- Name: edu_score; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.commodity (
+CREATE TABLE public.edu_score (
     id character varying DEFAULT public.uuid_generate_v4() NOT NULL,
-    v_name character varying,
-    n_price numeric,
-    v_info character varying,
-    b_sell boolean DEFAULT false
+    v_lesson character varying,
+    n_score numeric,
+    v_name character varying
 );
 
 
-ALTER TABLE public.commodity OWNER TO postgres;
+ALTER TABLE public.edu_score OWNER TO postgres;
 
 --
--- Name: commodity2; Type: TABLE; Schema: public; Owner: postgres
+-- Data for Name: edu_score; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.commodity2 (
-    id character varying DEFAULT public.uuid_generate_v4() NOT NULL,
-    v_name character varying,
-    n_price numeric,
-    v_info character varying,
-    i_quantity integer,
-    i_quantity_sell integer DEFAULT 0
-);
-
-
-ALTER TABLE public.commodity2 OWNER TO postgres;
-
---
--- Name: orders; Type: TABLE; Schema: public; Owner: postgres
---
-
-CREATE TABLE public.orders (
-    id character varying DEFAULT public.uuid_generate_v4() NOT NULL,
-    id_at_commodity character varying,
-    t_create timestamp without time zone DEFAULT now()
-);
-
-
-ALTER TABLE public.orders OWNER TO postgres;
-
---
--- Data for Name: commodity; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.commodity (id, v_name, n_price, v_info, b_sell) FROM stdin;
-794c9dbb-5620-4979-b5d1-dfecebf2f195	name_55	55	bf08e33ce1573c0c158ad0520a9c316d	f
-bf55d2ff-6b6c-4761-9661-702a1551aa78	name_42	42	13d3460396734510a7770fce47ba23ae	f
-2a19aefd-8120-46df-b412-fda70738f58f	name_73	73	2385bdd7c4e9e3cd8944c1d899c165bf	f
+COPY public.edu_score (id, v_lesson, n_score, v_name) FROM stdin;
+a06a2bb4-4cbb-49a0-a2c5-e936c86d1c79	语文	90	小明
 \.
 
 
 --
--- Data for Name: commodity2; Type: TABLE DATA; Schema: public; Owner: postgres
+-- Name: edu_score edu_score_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-COPY public.commodity2 (id, v_name, n_price, v_info, i_quantity, i_quantity_sell) FROM stdin;
-566e3ceb-e4d9-4e24-82df-b4ab200258a2	iphone xs max	9999	地表最强iphone	3	0
-\.
-
-
---
--- Data for Name: orders; Type: TABLE DATA; Schema: public; Owner: postgres
---
-
-COPY public.orders (id, id_at_commodity, t_create) FROM stdin;
-\.
+ALTER TABLE ONLY public.edu_score
+    ADD CONSTRAINT edu_score_pk PRIMARY KEY (id);
 
 
 --
--- Name: commodity2 commodity2_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
+-- Name: edu_score trigger_check_score; Type: TRIGGER; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.commodity2
-    ADD CONSTRAINT commodity2_pk PRIMARY KEY (id);
-
-
---
--- Name: commodity commodity_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.commodity
-    ADD CONSTRAINT commodity_pk PRIMARY KEY (id);
-
-
---
--- Name: orders orders_pk; Type: CONSTRAINT; Schema: public; Owner: postgres
---
-
-ALTER TABLE ONLY public.orders
-    ADD CONSTRAINT orders_pk PRIMARY KEY (id);
-
-
---
--- Name: commodity_b_sell_index2; Type: INDEX; Schema: public; Owner: postgres
---
-
-CREATE INDEX commodity_b_sell_index2 ON public.commodity USING btree (b_sell);
+CREATE TRIGGER trigger_check_score AFTER INSERT ON public.edu_score FOR EACH ROW EXECUTE PROCEDURE public.check_score();
 
 
 --
