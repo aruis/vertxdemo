@@ -13,7 +13,7 @@
     eb.enableReconnect(true)
     eb.onopen = function () {
         eb.registerHandler('flunk', function (err, msg) {
-            console.log(msg)
+            console.log(msg.body)
         })
     };
 </script>
