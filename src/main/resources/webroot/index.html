@@ -12,7 +12,7 @@
     var eb = new EventBus('/messagebus/');
     eb.enableReconnect(true)
     eb.onopen = function () {
-        eb.registerHandler('feed', function (err, msg) {
+        eb.registerHandler('flunk', function (err, msg) {
             console.log(msg)
         })
     };

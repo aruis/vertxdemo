@@ -6,13 +6,9 @@ import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.CookieHandler
-import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.BridgeOptions
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.ext.web.sstore.ClusteredSessionStore
-import io.vertx.ext.web.sstore.LocalSessionStore
 
 @Slf4j
 class HttpVerticle extends AbstractVerticle {
@@ -24,11 +20,10 @@ class HttpVerticle extends AbstractVerticle {
                         "port": 8899
                 ],
                 "db"  : [
-                        "host"    : "192.168.0.88",
-                        "port"    : 54328,
-                        "database": "miaosha",
+                        "host"    : "127.0.0.1",
+                        "database": "studypg",
                         "user"    : "postgres",
-                        "password": "longruan2018",
+                        "password": "",
                         "maxsize" : 6
                 ]
         ]]))
@@ -50,136 +45,9 @@ class HttpVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
         def port = httpConfig.getInteger("port", 8899)
 
-        def store
-        if (vertx.isClustered())
-            store = ClusteredSessionStore.create(vertx)
-        else
-            store = LocalSessionStore.create(vertx)
-
-        router.route().handler(CookieHandler.create())
-        router.route().handler(SessionHandler.create(store))
-
-        def eb = vertx.eventBus()
-
-        router.route("/clean").handler { routingContext ->
-            def response = routingContext.response()
-            eb.send('clean', '', {
-                if (it.succeeded()) {
-                    response.end("ok")
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-        }
-
-        router.route("/reset").handler({ routingContext ->
-
-            def response = routingContext.response()
-            def size = routingContext.request().getParam("size")
-
-            eb.send('reset', size, {
-                if (it.succeeded()) {
-                    response.end("ok")
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-        })
-
-        router.route("/miaosha_one_row").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_one_row', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-        })
-
-        router.route("/miaosha").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_pl").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_one_row_pl").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl', 'one_row', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/miaosha_pl_g").handler({ routingContext ->
-
-            def response = routingContext.response()
-
-            eb.send('miaosha_pl_g', '', {
-                if (it.succeeded()) {
-                    response.end(it.result().body().toString())
-                } else {
-                    response.end(it.cause().toString())
-                }
-            })
-
-
-        })
-
-        router.route("/set").handler({ routingContext ->
-
-            def session = routingContext.session()
-            session.put("foo", "bar")
-            routingContext.response().end()
-
-        })
-
-
-        router.route("/get").handler({ routingContext ->
-
-            def session = routingContext.session()
-            routingContext.response().end(session.get("foo").toString())
-
-        })
-
         // Allow events for the designated addresses in/out of the event bus bridge
         BridgeOptions opts = new BridgeOptions()
-                .addOutboundPermitted(new PermittedOptions().setAddress("feed"));
+                .addOutboundPermitted(new PermittedOptions().setAddress("flunk"));
 
         // Create the event bus bridge and add it to the router.
         SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
@@ -198,11 +66,5 @@ class HttpVerticle extends AbstractVerticle {
             }
 
         })
-
-
-        vertx.setPeriodic(1000l, { t ->
-            // Create a timestamp string
-            eb.send("feed", vertx.deploymentIDs().toString())
-        });
     }
 }

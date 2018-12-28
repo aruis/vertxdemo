@@ -67,5 +67,6 @@ dependencies {
     compile group: 'org.slf4j', name: 'jul-to-slf4j', version: '1.7.25'
 
     testCompile "org.codehaus.groovy:groovy-test:$groovy_version"
+    testCompile "io.vertx:vertx-unit:$vertx_version"
 }
 
