@@ -1,21 +1,37 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="myapp">
 <head>
     <meta charset="utf-8">
     <title>Hello Vert.x!</title>
+    <script src="angular.min.js"></script>
+    <script src="bus/sockjs.js"></script>
+    <script src="bus/vertx-eventbus.js"></script>
+    <script>
+
+        angular.module("myapp", [])
+            .controller('OneController', function ($scope) {
+                var model = this;
+                model.list = [{v_name: "test"}]
+
+                var eb = new EventBus('/messagebus/');
+                eb.enableReconnect(true)
+                eb.onopen = function () {
+                    eb.registerHandler('flunk', function (err, msg) {
+                        var str = msg.body
+                        model.list.push(angular.fromJson(str))
+                        $scope.$apply()
+                    })
+                };
+
+            })
+
+
+    </script>
 </head>
-<body>
+<body ng-controller="OneController as one">
 <h1>Hello Vert.x!</h1>
-<script src="bus/sockjs.js"></script>
-<script src="bus/vertx-eventbus.js"></script>
-<script>
-    var eb = new EventBus('/messagebus/');
-    eb.enableReconnect(true)
-    eb.onopen = function () {
-        eb.registerHandler('flunk', function (err, msg) {
-            console.log(msg.body)
-        })
-    };
-</script>
+<li ng-repeat="item in one.list">
+    <span>{{item.v_name}}</span>
+</li>
 </body>
 </html>
