@@ -1,0 +1,1 @@
+java -jar ./build/libs/vertxdemo-1.0-SNAPSHOT-fat.jar -cp ./src/main/resources -conf ./src/main/resources/config.json
