@@ -30,7 +30,7 @@ $$;
 CREATE TRIGGER trigger_check_score AFTER INSERT ON public.edu_score FOR EACH ROW EXECUTE PROCEDURE public.check_score();
 ```
 
-run your server,access http://127.0.0.1:8899,then
+run your server,access http://127.0.0.1:8899 ,then
 
 ```sql
 INSERT INTO "public"."edu_score" ("v_lesson", "n_score", "v_name") VALUES ('Math', 59, 'Jack');
@@ -39,3 +39,5 @@ INSERT INTO "public"."edu_score" ("v_lesson", "n_score", "v_name") VALUES ('Chem
 ```
 
 When the score of the inserted data is less than 60, the browser will show it.
+
+![](https://raw.githubusercontent.com/aruis/vertxdemo/postgres_notify/Screen%20Shot%202019-01-02%20at%204.23.39%20PM.png)
