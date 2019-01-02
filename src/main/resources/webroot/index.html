@@ -11,7 +11,7 @@
         angular.module("myapp", [])
             .controller('OneController', function ($scope) {
                 var model = this;
-                model.list = [{v_name: "test"}]
+                model.list = []
 
                 var eb = new EventBus('/messagebus/');
                 eb.enableReconnect(true)
