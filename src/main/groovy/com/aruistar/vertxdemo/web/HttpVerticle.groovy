@@ -4,6 +4,7 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.DeploymentOptions
 import io.vertx.core.Vertx
+import io.vertx.core.json.JsonObject
 import io.vertx.ext.bridge.PermittedOptions
 import io.vertx.ext.web.Router
 import io.vertx.ext.web.handler.StaticHandler
@@ -36,8 +37,18 @@ class HttpVerticle extends AbstractVerticle {
 
         log.info("Running with native: " + usingNative)
 
-        def httpConfig = config().getJsonObject("http")
+        def httpConfig = config().getJsonObject("http", new JsonObject([port: 8899]))
         def dbConfig = config().getJsonObject("db")
+
+        if (!dbConfig) {
+            dbConfig = [
+                    "host"    : "127.0.0.1",
+                    "database": "studypg",
+                    "user"    : "postgres",
+                    "password": "",
+                    "maxsize" : 6
+            ]
+        }
 
         vertx.deployVerticle(new DatabaseVerticle(), new DeploymentOptions([config: dbConfig]))
 
