@@ -3,11 +3,10 @@
     "port": 8899
   },
   "db": {
-    "host": "192.168.0.88",
-    "port": 54328,
-    "database": "miaosha",
-    "user": "postgres",
-    "password": "test",
-    "maxsize": 6
+    "host"    : "127.0.0.1",
+    "database": "studypg",
+    "user"    : "postgres",
+    "password": "",
+    "maxsize" : 6
   }
 }
