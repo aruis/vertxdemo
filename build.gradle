@@ -38,6 +38,7 @@ shadowJar {
     }
     mergeServiceFiles {
         include 'META-INF/services/io.vertx.core.spi.VerticleFactory'
+        include 'META-INF/spring.*'
     }
 
 }
