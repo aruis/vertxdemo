@@ -17,6 +17,7 @@ class HttpVerticle extends AbstractVerticle {
     void start() throws Exception {
 
         def httpConfig = config().getJsonObject("http", new JsonObject([port: 8899]))
+        def eb = vertx.eventBus()
 
         Router router = Router.router(vertx)
         def port = httpConfig.getInteger("port", 8899)
@@ -59,9 +60,14 @@ class HttpVerticle extends AbstractVerticle {
                 nickname = routingContext.session().get("nickname")
             }
 
-            if (nickname)
+            if (nickname) {
                 response.end(nickname)
-            else
+                eb.publish("chat.to.client", [
+                        from   : "⚙️",
+                        context: "欢迎 @$nickname 加入聊天室，❤️❤️❤️❤️❤️❤️❤️❤️",
+                        date   : new Date().format("yyyy-MM-dd HH:mm:ss:SSS")
+                ])
+            } else
                 response.end()
         })
 
@@ -74,8 +80,6 @@ class HttpVerticle extends AbstractVerticle {
 
         // Create a router endpoint for the static content.
         router.route().handler(StaticHandler.create());
-
-        def eb = vertx.eventBus()
 
         eb.consumer("chat.to.server").handler({ message ->
             def body = message.body()
