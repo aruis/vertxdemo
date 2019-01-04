@@ -9,7 +9,7 @@ import io.vertx.ext.web.handler.CookieHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.ext.web.sstore.LocalSessionStore
+import io.vertx.ext.web.sstore.ClusteredSessionStore
 
 @Slf4j
 class HttpVerticle extends AbstractVerticle {
@@ -41,7 +41,8 @@ class HttpVerticle extends AbstractVerticle {
         SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
         router.route("/messagebus/*").handler(ebHandler)
 
-        def store = LocalSessionStore.create(vertx)
+        def store = ClusteredSessionStore.create(vertx)
+//        LocalSessionStore.create(vertx)
         def sessionHandler = SessionHandler.create(store)
         def cookieHandler = CookieHandler.create()
         router.route("/nickname")
