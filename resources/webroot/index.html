@@ -84,7 +84,7 @@
             },
             save: function () {
                 if (vm.nickname != '') {
-                    axios.post('/nickname', {nickname: vm.nickname})
+                    axios.get('/nickname', {params: {nickname: vm.nickname}})
                         .then(function (value) {
                             vm.nicknameOnServer = value.data + ""
                         })

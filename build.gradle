@@ -49,7 +49,6 @@ dependencies {
 
     compile "io.vertx:vertx-core:$vertx_version"
     compile "io.vertx:vertx-web:$vertx_version"
-    compile "io.vertx:vertx-zookeeper:$vertx_version"
     compile("io.vertx:vertx-lang-groovy:$vertx_version") {
         exclude group: "org.codehaus.groovy", module: "groovy-all"
     }

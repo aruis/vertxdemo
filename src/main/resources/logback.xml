@@ -69,6 +69,7 @@
 
     <logger name="io.netty" level="warn"/>
     <logger name="io.vertx" level="warn"/>
+    <logger name="org.apache.zookeeper" level="info"/>
     <logger name="com.hazelcast" level="info"/>
     <logger name="com.aruistar" level="info"/>
 

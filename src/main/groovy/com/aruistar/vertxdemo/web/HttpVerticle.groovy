@@ -4,12 +4,11 @@ import groovy.util.logging.Slf4j
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
-import io.vertx.ext.web.handler.BodyHandler
 import io.vertx.ext.web.handler.CookieHandler
 import io.vertx.ext.web.handler.SessionHandler
 import io.vertx.ext.web.handler.StaticHandler
 import io.vertx.ext.web.handler.sockjs.SockJSHandler
-import io.vertx.ext.web.sstore.ClusteredSessionStore
+import io.vertx.ext.web.sstore.LocalSessionStore
 
 @Slf4j
 class HttpVerticle extends AbstractVerticle {
@@ -21,8 +20,6 @@ class HttpVerticle extends AbstractVerticle {
 
         Router router = Router.router(vertx)
         def port = httpConfig.getInteger("port", 8899)
-
-        def bodyHandler = BodyHandler.create()
 
         def opts = [
                 inboundPermitteds : [
@@ -41,31 +38,26 @@ class HttpVerticle extends AbstractVerticle {
         SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
         router.route("/messagebus/*").handler(ebHandler)
 
-        def store = ClusteredSessionStore.create(vertx)
-//        LocalSessionStore.create(vertx)
+        def store = LocalSessionStore.create(vertx)
         def sessionHandler = SessionHandler.create(store)
         def cookieHandler = CookieHandler.create()
         router.route("/nickname")
                 .handler(cookieHandler)
                 .handler(sessionHandler)
 
-        router.post("/nickname")
-                .handler(bodyHandler)
-                .handler({ routingContext ->
-
-            def response = routingContext.response()
-            def nickname = routingContext.getBodyAsJson().nickname
-
-            routingContext.session().put("nickname", nickname)
-
-            response.end(nickname)
-        })
-
         router.get("/nickname")
                 .handler({ routingContext ->
 
+            def request = routingContext.request()
             def response = routingContext.response()
-            def nickname = routingContext.session().get("nickname")
+
+            def nickname = request.getParam("nickname")
+
+            if (nickname && nickname.length() > 0) {
+                routingContext.session().put("nickname", nickname)
+            } else {
+                nickname = routingContext.session().get("nickname")
+            }
 
             if (nickname)
                 response.end(nickname)
