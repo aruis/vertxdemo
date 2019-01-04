@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <!-- import CSS -->
+    <link href="https://cdn.bootcss.com/element-ui/2.4.11/theme-chalk/index.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/vue/2.5.21/vue.min.js"></script>
+    <script src="https://cdn.bootcss.com/sockjs-client/1.3.0/sockjs.min.js"></script>
+    <script src="bus/vertx-eventbus.js"></script>
+    <script src="https://cdn.bootcss.com/element-ui/2.4.11/index.js"></script>
+    <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-container>
+        <el-header>
+            <el-row>
+                <el-col :span="12">
+                    <h2> Hello Vert.x · 聊天室</h2>
+                </el-col>
+                <el-col :span="6" :offset="6" v-show="nicknameOnServer.length>0">
+                    <h2>欢迎你：{{nicknameOnServer}}</h2>
+                </el-col>
+            </el-row>
+
+
+        </el-header>
+        <el-main>
+            <el-form :inline="true" @submit.native.prevent v-show="nicknameOnServer.length==0">
+                <el-form-item>
+                    <el-input v-model="nickname" placeholder="给自己起一个霸气的昵称" @keyup.enter.native="send"
+                              style="width: 280px"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click.native.prevent="save">应用</el-button>
+                </el-form-item>
+            </el-form>
+
+            <el-table :data="tableData" style="width: 100%" v-show="nicknameOnServer.length>0">
+                <el-table-column prop="from" label="来源" width="180"></el-table-column>
+                <el-table-column prop="context" label="内容"></el-table-column>
+                <el-table-column prop="date" label="时间" width="180"></el-table-column>
+            </el-table>
+            <div style="height: 20px"></div>
+            <el-form :inline="true" @submit.native.prevent v-show="nicknameOnServer.length>0">
+                <el-form-item>
+                    <el-input v-model="context" placeholder="输入内容，开始聊天" @keyup.enter.native="send"
+                              style="width: 600px"></el-input>
+                </el-form-item>
+                <el-form-item>
+                    <el-button type="primary" @click.native.prevent="send">发送</el-button>
+                </el-form-item>
+            </el-form>
+        </el-main>
+    </el-container>
+</div>
+</body>
+<script>
+    var eb = new EventBus('/messagebus/');
+    eb.enableReconnect(true)
+    eb.onopen = function () {
+        eb.registerHandler('chat.to.client', function (err, msg) {
+            vm.tableData.push(msg.body);
+            window.scrollTo(0, document.body.scrollHeight);
+        })
+    };
+
+    var vm = new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                tableData: [],
+                context: "",
+                nickname: "",
+                nicknameOnServer: ""
+            }
+        },
+        methods: {
+            send: function () {
+                if (vm.context != '') {
+                    eb.publish("chat.to.server", {context: vm.context, from: vm.nicknameOnServer});
+                    vm.context = ''
+                }
+            },
+            save: function () {
+                if (vm.nickname != '') {
+                    axios.post('/nickname', {nickname: vm.nickname})
+                        .then(function (value) {
+                            vm.nicknameOnServer = value.data + ""
+                        })
+
+                }
+            }
+        },
+        mounted: function () {
+            axios.get('/nickname')
+                .then(function (value) {
+                    vm.nicknameOnServer = value.data + ""
+                })
+        }
+    });
+
+</script>
+</html>

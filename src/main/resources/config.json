@@ -1,12 +1,5 @@
 {
   "http": {
     "port": 8899
-  },
-  "db": {
-    "host"    : "127.0.0.1",
-    "database": "studypg",
-    "user"    : "postgres",
-    "password": "",
-    "maxsize" : 6
   }
 }
