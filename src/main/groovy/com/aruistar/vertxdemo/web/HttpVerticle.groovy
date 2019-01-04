@@ -41,7 +41,7 @@ class HttpVerticle extends AbstractVerticle {
         def store = LocalSessionStore.create(vertx)
         def sessionHandler = SessionHandler.create(store)
         def cookieHandler = CookieHandler.create()
-        router.route("/nickname")
+        router.route()
                 .handler(cookieHandler)
                 .handler(sessionHandler)
 
@@ -63,6 +63,13 @@ class HttpVerticle extends AbstractVerticle {
                 response.end(nickname)
             else
                 response.end()
+        })
+
+        router.route("/logout").handler({ routingContext ->
+
+            def response = routingContext.response()
+            routingContext.session().destroy()
+            response.end()
         })
 
         // Create a router endpoint for the static content.
